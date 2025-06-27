@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!-- Listener Config -->
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="23ae7b95-f3fe-4cac-bfe0-e61a67556763">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+
+    <!-- HTTPS Request Config -->
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9ac2e35c-24ad-4b15-856f-5c70b39f33e2" basePath="/api/Time">
+        <http:request-connection host="timeapi.io" protocol="HTTPS" >
+		</http:request-connection>
+    </http:request-config>
+
+    <!-- Main Flow -->
+    <flow name="world-demo-apiFlow" doc:id="468afefd-45f6-4acc-a04a-2a6721b73184">
+        <!-- Local endpoint -->
+        <http:listener doc:name="Listener" doc:id="296fff12-679a-4862-a6b6-c02b39d3838d"
+                       config-ref="HTTP_Listener_config" path="/wapi"/>
+
+        <!-- External API call -->
+        <http:request method="GET" doc:name="Request to TimeAPI" doc:id="8e3729ed-d937-4b7e-b014-d2f1698b5215"
+                      config-ref="HTTP_Request_configuration" path="/current/zone" sendCorrelationId="AUTO">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	timeZone : "Asia/Tokyo"
+}]]]></http:query-params>
+        </http:request>
+
+        <!-- Log the response -->
+        <logger level="INFO" doc:name="Logger" message="#[payload]" />
+    </flow>
+</mule>
